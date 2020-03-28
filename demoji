@@ -1,0 +1,12 @@
+#!/bin/sh
+
+emojis="$HOME/.local/share/misc/emoji"
+
+sel=$(cut -d ";" -f 1 "$emojis" | dmenu -l 10 -fn "monospace:pixelsize=14" -w $(xdotool getwindowfocus) | awk '{print $1}' | tr -d "\n")  
+
+[ "$sel" = "" ] && exit
+
+	echo $sel | xclip -selection clipboard
+	notify-send "$sel copied!" &
+
+

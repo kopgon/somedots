@@ -1,0 +1,160 @@
+#!/bin/sh
+
+#LABELS
+label_power='🔋'
+label_power_charging='⚡'
+label_date='📅'
+label_negative='⛔'
+label_vol='🔊'
+label_mem='📊'
+label_temp='🔥'
+label_home='💿'
+label_root=' 💾'
+ 
+#POWER MODULE
+_power()
+{
+	label=$label_power
+
+	dir="/sys/class/power_supply/BAT0"
+	status=$(cat $dir/status)
+	percentage=`(cat $dir/capacity)`
+
+	label=$label_power
+	output="`cat $dir/capacity`%"
+
+	case $status in
+		C*)
+			label=$label_power_charging
+			output="^$output"
+			;;
+		D*)
+			case $percentage in
+				[0-15])
+					output="$output"
+					;;
+				*)
+					;;
+			esac
+			;;
+		F*)
+			output="FULL"
+			;;
+	esac
+
+	echo $label $output
+}
+
+
+#DATE MODULE
+_date(){
+	label=$label_date
+	
+	output=`date "+%a %H:%M"`
+
+	echo $label $output
+}
+
+#VOLUME MODULE
+
+_vol(){
+
+stat="amixer get Master"
+mute=`$stat |awk '/%/{print $6}'`
+
+
+label=$label_vol
+
+case $mute in
+	*off*)
+		output="MUTE"
+	;;
+	*on*)
+		output=$($stat | sed '$!d; s/[][]//g' | cut -d" " -f6)
+	;;
+esac
+
+	echo $label $output
+}
+
+
+#INTERNET MODULE
+#Bruh, you need networkmanager for this, sorry
+_net(){
+	state=$(nmcli networking connectivity)
+	label=$label_net
+
+	case $state in
+		full)
+			tech=$(nmcli -g TYPE connection show --active)
+
+			case $tech in
+				*wireless)
+					output=$(nmcli -g NAME connection show --active)
+					label=$label_net_wifi
+					;;
+				*ethernet)
+					output=CONNECTED
+			esac
+			;;
+		none)
+			label=$label_negative
+			output=
+			;;
+		limited)
+			output=LIMITED
+			;;
+		*)
+			output=PROBLEMS
+			;;
+	esac
+
+	echo $label $output
+}
+
+_mem(){
+output=`free -h --si | awk '/^Mem/ {print $3"/"$2}'`
+label=$label_mem
+
+	echo $label $output
+}
+
+_temp(){
+output=`acpi -t | awk '{print $4}'`
+output=`echo "$output""º"`
+
+label=$label_temp
+
+	echo $label $output
+}
+
+_home(){
+	output=`df -h | awk '/\/home$/ {print $5}'`
+	label=$label_home
+
+	echo $label $output
+}
+
+_root(){
+	output=`df -h | awk '/\/$/ {print $5}'`
+	label=$label_root
+
+	echo $label $output
+}
+
+echo $$ > /tmp/bar
+
+while :; do
+
+buf=
+buf="$buf $(_home)"
+buf="$buf $(_root)"
+buf="$buf $(_mem)"
+buf="$buf $(_temp)"
+buf="$buf $(_power)"
+buf="$buf $(_vol)"
+buf="$buf $(_date)"
+
+	xsetroot -name "$buf"	
+	sleep 3
+done
