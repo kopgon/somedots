@@ -1,0 +1,57 @@
+## BSPWM
+super + Return
+	st
+
+super + d
+	dmenu_run
+
+#close/kill window
+super + {_,shift +} w
+	bspc node -{c,k}
+
+#resize
+super + {h,j,k,l}
+	bspc node -z {left -20 0, bottom 0 20, top 20 0, right 20 0}
+
+#alternate layouts
+super + m
+	bspc desktop -l next
+
+#workspaces
+super + {_,shift +}{1-9}
+	bspc {desktop -f,node -d} '^{1-9}'; refbar
+
+#window state/flag
+super + {t,shift + t,s,f}
+	bspc node -t {tiled,pseudo_tiled,floating,fullscreen}
+
+super + ctrl + {m,l,s,p}
+	bspc node -g {marked,locked,sticky,private}
+
+#moving windows
+super + {Left,Down,Up,Right}
+	bspc node -v {-20 0,0 20,0 -20,20 0}
+
+#cycling focus
+super + {_,shift + }c
+	bspc node -f {next,prev}.local; refbar
+
+#preselect direction
+super + ctrl + {h,j,k,l}
+	bspc node -p {west,south,north,east}
+
+#cancel that
+super + ctrl + space
+	bspc node -p cancel
+
+#gaps
+
+super + plus
+	bspc config window_gap $((`bspc config window_gap` + 3)) 
+
+super + minus
+	bspc config window_gap $((`bspc config window_gap` - 3)) 
+
+super + equal
+	bspc config window_gap 7
+

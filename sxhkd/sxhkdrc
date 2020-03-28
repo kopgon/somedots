@@ -1,0 +1,27 @@
+## PROGRAM BINDS
+
+## SXHKD RELOAD
+super + Escape
+	pkill -USR1 -x sxhkd
+
+## AUDIO BINDS
+
+XF86AudioRaiseVolume
+	amixer sset Master playback 2%+; refbar
+
+XF86AudioLowerVolume
+	amixer sset Master playback 2%-; refbar
+
+XF86AudioMute
+	amixer sset Master toggle; refbar
+
+XF86MonBrightnessUp
+	xbacklight -inc 10
+
+XF86MonBrightnessDown
+	xbacklight -dec 10
+
+## SC
+
+Print
+	maim "$HOME/pictures/prt/$(date +%d-\%m_%H-%M-%S).png" && notify-send PRT!
